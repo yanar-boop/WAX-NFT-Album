@@ -7,7 +7,17 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --rr-primary: #00ff41; --rr-accent: #ffd700; --rr-dark: #121212; }
-        body { background: #f0f2f5; font-family: sans-serif; margin: 0; padding: 20px; }
+        body {
+    background-image: url('background.jpg'); /* Utilise ton image */
+    background-attachment: fixed; /* L'image ne défile pas avec la page */
+    background-size: cover; /* L'image couvre tout l'écran */
+    background-position: center; /* Centre l'image */
+    background-color: #121212; /* Couleur de secours si l'image ne charge pas */
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    color: white; /* Pour que le texte reste lisible sur fond sombre */
+}
         #rr-header { background: var(--rr-dark); border-radius: 12px; padding: 25px; text-align: center; color: white; margin-bottom: 20px; }
         .rr-search-box { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
         input { padding: 12px; border-radius: 25px; border: 1px solid #444; background: #1a1a1a; color: var(--rr-primary); width: 200px; }
@@ -142,4 +152,5 @@
     rr_init();
 </script>
 </body>
+
 </html>
