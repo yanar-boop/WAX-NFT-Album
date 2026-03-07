@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reward Runner Collector - v7.5</title>
+    <title>Reward Runner Collector - v7.6</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --rr-primary: #00ff41; --rr-accent: #ffd700; --rr-dark: #121212; }
         
         body { 
             background-image: url('background.png'); 
-            background-attachment: fixed; background-size: cover; background-position: center;
-            background-color: var(--rr-dark); font-family: 'Segoe UI', sans-serif; 
+            background-attachment: fixed; 
+            background-size: auto; /* Supprime le zoom */
+            background-repeat: repeat; /* Répète la texture proprement */
+            background-position: top left;
+            background-color: var(--rr-dark); 
+            font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 20px; color: white;
         }
 
@@ -35,7 +39,6 @@
             width: 250px; outline: none; 
         }
 
-        /* STYLE BOUTON (SCAN ET RETOUR) */
         .rr-btn-action { 
             padding: 12px 25px; border-radius: 25px; border: none; 
             font-weight: bold; cursor: pointer; background: var(--rr-primary); 
@@ -44,32 +47,36 @@
         }
         .rr-btn-action:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--rr-primary); }
 
-        /* GRILLES */
-        .rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        /* GRILLES - RÉDUITE DE 25% POUR LES ALBUMS */
+        .rr-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Taille réduite de 200px à 150px */
+            gap: 15px; 
+        }
 
-        /* VIGNETTES COMMUNES (ALBUMS ET NFTS) */
+        /* VIGNETTES COMMUNES */
         .rr-card { 
             background: rgba(255, 255, 255, 0.1); 
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px; 
-            padding: 15px; 
+            border-radius: 12px; 
+            padding: 12px; 
             text-align: center; 
             position: relative; 
             color: white;
             transition: 0.3s;
         }
-        .rr-card:hover { border-color: var(--rr-primary); }
+        .rr-card:hover { border-color: var(--rr-primary); transform: translateY(-3px); }
 
-        .rr-card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
+        .rr-card img { width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px; } /* Image réduite aussi */
 
         /* SPECIFIQUE ALBUM */
         .rr-album-card { cursor: pointer; }
         .rr-badge { 
-            position: absolute; top: 10px; right: 10px; 
+            position: absolute; top: 8px; right: 8px; 
             background: #000; color: var(--rr-primary); 
-            padding: 4px 12px; border-radius: 12px; 
-            font-size: 0.75rem; font-weight: bold; border: 1px solid var(--rr-primary);
+            padding: 2px 8px; border-radius: 10px; 
+            font-size: 0.65rem; font-weight: bold; border: 1px solid var(--rr-primary);
         }
 
         /* SPECIFIQUE NFT */
@@ -100,7 +107,7 @@
         <button class="rr-btn-action" onclick="rr_showLibrary()">RETOUR</button>
     </div>
     <div class="rr-panel">
-        <h2 id="rr-album-name" style="margin:0; color: var(--rr-accent); text-transform: uppercase; letter-spacing: 2px;"></h2>
+        <h2 id="rr-album-name" style="margin:0; color: var(--rr-accent); text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem;"></h2>
     </div>
     <div id="rr-nft-grid" class="rr-grid"></div>
 </div>
@@ -149,8 +156,8 @@
                 html += `<div class="rr-card rr-album-card" onclick="rr_openAlbum('${s.schema_name}')">
                             <div class="rr-badge" id="badge-${s.schema_name}">0%</div>
                             <img src="${img}">
-                            <div style="font-weight:bold; font-size:0.9rem; letter-spacing:1px;">${s.schema_name.toUpperCase()}</div>
-                            <div style="font-size:0.7rem; color:var(--rr-primary); margin-top:5px;">${tData.data.length} CARTES</div>
+                            <div style="font-weight:bold; font-size:0.8rem; letter-spacing:1px;">${s.schema_name.toUpperCase()}</div>
+                            <div style="font-size:0.65rem; color:var(--rr-primary); margin-top:5px;">${tData.data.length} CARTES</div>
                         </div>`;
             }
             lib.innerHTML = html;
@@ -200,7 +207,7 @@
             const isOwned = rr_owned.includes(t.template_id);
             return `<div class="rr-card rr-nft-card ${isOwned ? 'owned' : ''}">
                         <img src="https://ipfs.io/ipfs/${t.immutable_data.img}">
-                        <div style="font-size:0.7rem; margin-top:5px; color:${isOwned ? 'var(--rr-accent)' : '#888'}">
+                        <div style="font-size:0.65rem; margin-top:5px; color:${isOwned ? 'var(--rr-accent)' : '#888'}">
                             ${isOwned ? 'POSSÉDÉ' : '#' + t.template_id}
                         </div>
                     </div>`;
