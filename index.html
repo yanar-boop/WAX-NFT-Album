@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reward Runner Collector - v7.4</title>
+    <title>Reward Runner Collector - v7.5</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --rr-primary: #00ff41; --rr-accent: #ffd700; --rr-dark: #121212; }
         
         body { 
-            /* MISE À JOUR : Extension .png */
             background-image: url('background.png'); 
             background-attachment: fixed; background-size: cover; background-position: center;
             background-color: var(--rr-dark); font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 20px; color: white;
         }
 
+        /* STYLE PANNEAU (SCAN ET TITRE) */
         .rr-panel {
             background: rgba(18, 18, 18, 0.9); 
             backdrop-filter: blur(10px);
@@ -27,44 +27,44 @@
             margin-bottom: 20px;
         }
 
-        #rr-back {
-            display: block;
-            width: fit-content;
-            margin: 0 auto 20px auto;
-            background: rgba(18, 18, 18, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--rr-primary);
-            color: var(--rr-primary);
-            padding: 10px 25px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .rr-search-box { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        
+        input { 
+            padding: 12px; border-radius: 25px; border: 1px solid #444; 
+            background: rgba(0,0,0,0.7); color: var(--rr-primary); 
+            width: 250px; outline: none; 
+        }
+
+        /* STYLE BOUTON (SCAN ET RETOUR) */
+        .rr-btn-action { 
+            padding: 12px 25px; border-radius: 25px; border: none; 
+            font-weight: bold; cursor: pointer; background: var(--rr-primary); 
+            color: black; text-transform: uppercase; letter-spacing: 1px;
             transition: 0.3s;
         }
-        #rr-back:hover { box-shadow: 0 0 15px var(--rr-primary); transform: scale(1.02); }
+        .rr-btn-action:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--rr-primary); }
 
-        .rr-search-box { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        input { padding: 12px; border-radius: 25px; border: 1px solid #444; background: rgba(0,0,0,0.7); color: var(--rr-primary); width: 250px; outline: none; }
-        .rr-btn-scan { padding: 12px 25px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; background: var(--rr-primary); color: black; }
+        /* GRILLES */
+        .rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
 
-        .rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-
-        .rr-album-card { 
+        /* VIGNETTES COMMUNES (ALBUMS ET NFTS) */
+        .rr-card { 
             background: rgba(255, 255, 255, 0.1); 
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 15px; 
             padding: 15px; 
             text-align: center; 
-            cursor: pointer; 
             position: relative; 
             color: white;
             transition: 0.3s;
         }
-        .rr-album-card:hover { border-color: var(--rr-primary); transform: translateY(-5px); }
+        .rr-card:hover { border-color: var(--rr-primary); }
 
+        .rr-card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
+
+        /* SPECIFIQUE ALBUM */
+        .rr-album-card { cursor: pointer; }
         .rr-badge { 
             position: absolute; top: 10px; right: 10px; 
             background: #000; color: var(--rr-primary); 
@@ -72,31 +72,22 @@
             font-size: 0.75rem; font-weight: bold; border: 1px solid var(--rr-primary);
         }
 
-        .rr-album-card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
-
-        .rr-nft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 20px;}
-        .rr-nft-card { 
-            background: rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(5px);
-            border-radius: 10px; 
-            padding: 10px; 
-            text-align: center; 
-            border: 1px solid rgba(255, 255, 255, 0.2); 
-        }
-        .rr-nft-card img { width: 100%; filter: grayscale(1) opacity(0.3); }
+        /* SPECIFIQUE NFT */
+        .rr-nft-card img { filter: grayscale(1) opacity(0.3); }
         .rr-nft-card.owned { border: 2px solid var(--rr-accent); background: rgba(255, 215, 0, 0.1); }
         .rr-nft-card.owned img { filter: none; opacity: 1; }
 
         .hidden { display: none !important; }
+        #rr-back-container { text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div id="rr-header" class="rr-panel">
-    <div id="rr-status" style="font-size:0.8rem; color:var(--rr-primary); font-family: monospace;">>> SCANNING_FOR_ACTIVE_NODE...</div>
+    <div id="rr-status" style="font-size:0.8rem; color:var(--rr-primary); font-family: monospace;">>> SCANNING_NODES...</div>
     <div class="rr-search-box">
         <input type="text" id="rr-wallet" placeholder="Wallet (ex: rewardrun.gm)">
-        <button class="rr-btn-scan" onclick="rr_scan()">SCANNER</button>
+        <button class="rr-btn-action" onclick="rr_scan()">SCANNER</button>
     </div>
 </div>
 
@@ -105,11 +96,13 @@
 </div>
 
 <div id="rr-album-view" class="hidden">
-    <button id="rr-back" onclick="rr_showLibrary()">⬅ RETOUR AU GARAGE</button>
+    <div id="rr-back-container">
+        <button class="rr-btn-action" onclick="rr_showLibrary()">RETOUR</button>
+    </div>
     <div class="rr-panel">
         <h2 id="rr-album-name" style="margin:0; color: var(--rr-accent); text-transform: uppercase; letter-spacing: 2px;"></h2>
     </div>
-    <div id="rr-nft-grid" class="rr-nft-grid"></div>
+    <div id="rr-nft-grid" class="rr-grid"></div>
 </div>
 
 <script>
@@ -153,7 +146,7 @@
                 rr_mapping[s.schema_name] = tData.data;
                 rr_schemaTotals[s.schema_name] = tData.data.length;
                 const img = tData.data[0] ? `https://ipfs.io/ipfs/${tData.data[0].immutable_data.img}` : '';
-                html += `<div class="rr-album-card" onclick="rr_openAlbum('${s.schema_name}')">
+                html += `<div class="rr-card rr-album-card" onclick="rr_openAlbum('${s.schema_name}')">
                             <div class="rr-badge" id="badge-${s.schema_name}">0%</div>
                             <img src="${img}">
                             <div style="font-weight:bold; font-size:0.9rem; letter-spacing:1px;">${s.schema_name.toUpperCase()}</div>
@@ -163,7 +156,7 @@
             lib.innerHTML = html;
             document.getElementById('rr-status').innerText = ">> SYSTEM_READY_";
         } catch(e) {
-            document.getElementById('rr-status').innerText = ">> NODES_OFFLINE_TRY_LATER";
+            document.getElementById('rr-status').innerText = ">> NODES_OFFLINE";
         }
     }
 
@@ -186,7 +179,7 @@
             });
             if(rr_activeSchema) rr_renderAlbum();
             document.getElementById('rr-status').innerText = ">> SCAN_COMPLETE: " + rr_owned.length + " NFTS FOUND";
-            if(rr_owned.length > 0) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            if(rr_owned.length > 0) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#00ff41', '#ffd700'] });
         } catch(e) {
             document.getElementById('rr-status').innerText = ">> SCAN_FAILED_";
         }
@@ -205,7 +198,7 @@
         const templates = rr_mapping[rr_activeSchema];
         document.getElementById('rr-nft-grid').innerHTML = templates.map(t => {
             const isOwned = rr_owned.includes(t.template_id);
-            return `<div class="rr-nft-card ${isOwned ? 'owned' : ''}">
+            return `<div class="rr-card rr-nft-card ${isOwned ? 'owned' : ''}">
                         <img src="https://ipfs.io/ipfs/${t.immutable_data.img}">
                         <div style="font-size:0.7rem; margin-top:5px; color:${isOwned ? 'var(--rr-accent)' : '#888'}">
                             ${isOwned ? 'POSSÉDÉ' : '#' + t.template_id}
