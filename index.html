@@ -3,80 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reward Runner Collector - v7.2</title>
+    <title>Reward Runner Collector - v7.4</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --rr-primary: #00ff41; --rr-accent: #ffd700; --rr-dark: #121212; }
+        
         body { 
+            /* MISE À JOUR : Extension .png */
             background-image: url('background.png'); 
             background-attachment: fixed; background-size: cover; background-position: center;
             background-color: var(--rr-dark); font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 20px; color: white;
         }
-        #rr-header { 
-            background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px);
-            border: 1px solid var(--rr-primary); border-radius: 12px; padding: 25px; 
-            text-align: center; margin-bottom: 20px; 
+
+        .rr-panel {
+            background: rgba(18, 18, 18, 0.9); 
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--rr-primary); 
+            border-radius: 12px; 
+            padding: 20px; 
+            text-align: center; 
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            margin-bottom: 20px;
         }
+
+        #rr-back {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 20px auto;
+            background: rgba(18, 18, 18, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--rr-primary);
+            color: var(--rr-primary);
+            padding: 10px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        #rr-back:hover { box-shadow: 0 0 15px var(--rr-primary); transform: scale(1.02); }
+
         .rr-search-box { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
         input { padding: 12px; border-radius: 25px; border: 1px solid #444; background: rgba(0,0,0,0.7); color: var(--rr-primary); width: 250px; outline: none; }
-        .rr-btn { padding: 12px 25px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; background: var(--rr-primary); }
+        .rr-btn-scan { padding: 12px 25px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; background: var(--rr-primary); color: black; }
+
         .rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .rr-album-card { background: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 15px; text-align: center; cursor: pointer; position: relative; color: #333; }
-        .rr-badge { position: absolute; top: 10px; right: 10px; background: #000; color: var(--rr-primary); padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
-        .rr-album-card img { width: 100%; height: 160px; object-fit: contain; }
+
+        .rr-album-card { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px; 
+            padding: 15px; 
+            text-align: center; 
+            cursor: pointer; 
+            position: relative; 
+            color: white;
+            transition: 0.3s;
+        }
+        .rr-album-card:hover { border-color: var(--rr-primary); transform: translateY(-5px); }
+
+        .rr-badge { 
+            position: absolute; top: 10px; right: 10px; 
+            background: #000; color: var(--rr-primary); 
+            padding: 4px 12px; border-radius: 12px; 
+            font-size: 0.75rem; font-weight: bold; border: 1px solid var(--rr-primary);
+        }
+
+        .rr-album-card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
+
         .rr-nft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 20px;}
-        .rr-nft-card { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        .rr-nft-card { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(5px);
+            border-radius: 10px; 
+            padding: 10px; 
+            text-align: center; 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
         .rr-nft-card img { width: 100%; filter: grayscale(1) opacity(0.3); }
         .rr-nft-card.owned { border: 2px solid var(--rr-accent); background: rgba(255, 215, 0, 0.1); }
         .rr-nft-card.owned img { filter: none; opacity: 1; }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="rr-header">
+<div id="rr-header" class="rr-panel">
     <div id="rr-status" style="font-size:0.8rem; color:var(--rr-primary); font-family: monospace;">>> SCANNING_FOR_ACTIVE_NODE...</div>
     <div class="rr-search-box">
         <input type="text" id="rr-wallet" placeholder="Wallet (ex: rewardrun.gm)">
-        <button class="rr-btn" onclick="rr_scan()">SCANNER</button>
+        <button class="rr-btn-scan" onclick="rr_scan()">SCANNER</button>
     </div>
 </div>
 
-<button id="rr-back" class="rr-btn hidden" onclick="rr_showLibrary()" style="margin-bottom:20px; background:#444; color:white;">⬅ RETOUR</button>
-<div id="rr-library" class="rr-grid"></div>
-<div id="rr-album" class="hidden">
-    <h2 id="rr-album-name" style="text-align: center; color: var(--rr-accent);"></h2>
+<div id="rr-library-view">
+    <div id="rr-library" class="rr-grid"></div>
+</div>
+
+<div id="rr-album-view" class="hidden">
+    <button id="rr-back" onclick="rr_showLibrary()">⬅ RETOUR AU GARAGE</button>
+    <div class="rr-panel">
+        <h2 id="rr-album-name" style="margin:0; color: var(--rr-accent); text-transform: uppercase; letter-spacing: 2px;"></h2>
+    </div>
     <div id="rr-nft-grid" class="rr-nft-grid"></div>
 </div>
 
 <script>
-    // Liste élargie d'APIs WAX ultra-fiables
     const ENDPOINTS = [
         "https://wax.greymass.com",
         "https://wax.pink.gg",
         "https://aa.neftyblocks.com",
-        "https://wax.api.atomicassets.io",
-        "https://api.wax.alohaeos.com"
+        "https://wax.api.atomicassets.io"
     ];
     
     let currentEndpointIndex = 0;
     const RR_COLLECTION = "rewardrunner";
     let rr_schemas = []; let rr_mapping = {}; let rr_owned = []; let rr_activeSchema = ""; let rr_schemaTotals = {}; 
 
-    // Fonction de récupération avec gestion de timeout (5 secondes max par essai)
     async function fetchWithRetry(path) {
         for (let attempt = 0; attempt < ENDPOINTS.length * 2; attempt++) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
-            
             try {
                 const endpoint = ENDPOINTS[currentEndpointIndex];
-                document.getElementById('rr-status').innerText = `>> TRYING_NODE: ${new URL(endpoint).hostname}...`;
-                
                 const res = await fetch(`${endpoint}${path}`, { signal: controller.signal });
                 clearTimeout(timeoutId);
-                
                 if (res.ok) return await res.json();
                 throw new Error("Node error");
             } catch (e) {
@@ -93,7 +148,6 @@
             rr_schemas = data.data;
             const lib = document.getElementById('rr-library');
             let html = '';
-            
             for (const s of rr_schemas) {
                 const tData = await fetchWithRetry(`/atomicassets/v1/templates?collection_name=${RR_COLLECTION}&schema_name=${s.schema_name}&limit=1000`);
                 rr_mapping[s.schema_name] = tData.data;
@@ -102,8 +156,8 @@
                 html += `<div class="rr-album-card" onclick="rr_openAlbum('${s.schema_name}')">
                             <div class="rr-badge" id="badge-${s.schema_name}">0%</div>
                             <img src="${img}">
-                            <div style="font-weight:bold; margin-top:10px; font-size:0.9rem;">${s.schema_name.toUpperCase()}</div>
-                            <div style="font-size:0.7rem; color:#666;">${tData.data.length} CARTES</div>
+                            <div style="font-weight:bold; font-size:0.9rem; letter-spacing:1px;">${s.schema_name.toUpperCase()}</div>
+                            <div style="font-size:0.7rem; color:var(--rr-primary); margin-top:5px;">${tData.data.length} CARTES</div>
                         </div>`;
             }
             lib.innerHTML = html;
@@ -140,11 +194,11 @@
 
     function rr_openAlbum(name) {
         rr_activeSchema = name;
-        document.getElementById('rr-library').classList.add('hidden');
-        document.getElementById('rr-album').classList.remove('hidden');
-        document.getElementById('rr-back').classList.remove('hidden');
-        document.getElementById('rr-album-name').innerText = "ALBUM : " + name;
+        document.getElementById('rr-library-view').classList.add('hidden');
+        document.getElementById('rr-album-view').classList.remove('hidden');
+        document.getElementById('rr-album-name').innerText = name;
         rr_renderAlbum();
+        window.scrollTo(0,0);
     }
 
     function rr_renderAlbum() {
@@ -162,9 +216,8 @@
 
     function rr_showLibrary() {
         rr_activeSchema = "";
-        document.getElementById('rr-library').classList.remove('hidden');
-        document.getElementById('rr-album').classList.add('hidden');
-        document.getElementById('rr-back').classList.add('hidden');
+        document.getElementById('rr-library-view').classList.remove('hidden');
+        document.getElementById('rr-album-view').classList.add('hidden');
     }
 
     rr_init();
